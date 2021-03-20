@@ -1,0 +1,11 @@
+type Owner @entity {
+  id: ID!
+  address: Bytes!
+  sprinkles: [Sprinkle!] @derivedFrom(field: "owner")
+}
+
+type Sprinkle @entity {
+  id: ID!
+  owner: Owner
+  publicKeyHash: Bytes
+}

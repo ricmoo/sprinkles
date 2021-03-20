@@ -1,0 +1,80 @@
+body {
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+#root {
+  position: relative;
+}
+
+.container {
+}
+
+#home > .title {
+  color: #00B7FF;
+  font-size: xx-large;
+}
+
+#home p {
+  color: palevioletred;
+}
+
+#home {
+  text-align: center;
+}
+
+a {
+  color: #00B7FF;
+}
+
+#connect {
+  padding: 10px;
+  border-radius: 10px;
+  padding: 40px 20px;
+  width: 60%;
+  margin: 20px auto;
+  color: #f6851b;
+  font-family: 'Euclid Circular B', sans-serif;
+  line-height: 40px;
+  font-weight: 400;
+  box-shadow: 0 0 10px rgba(95, 125, 149, .3);
+  transition: transform 150ms cubic-bezier(.25,.46,.45,.94), box-shadow 150ms cubic-bezier(.25,.46,.45,.94);
+}
+
+#connect:hover {
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(95, 125, 149, .3);
+}
+
+#dashboard {
+  display: xnone;
+}
+
+#dashboard .header {
+  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  padding: 10px;
+  overflow: auto;
+  position: fixed;
+  width: 100%;
+}
+
+#dashboard .header .logo {
+  width: 50%;
+  float: left;
+  color: #00B7FF;
+  font-size: 30px;
+}
+
+#dashboard .header .address-box {
+  text-align: end;
+  position: absolute;
+  right: 0;
+  padding: 10px;
+}
+
+#not-found {
+  font-size: 30px;
+  text-align: center;
+  padding-top: 100px;
+  color: #f6851b;
+}

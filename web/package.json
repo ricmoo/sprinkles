@@ -1,0 +1,27 @@
+{
+  "name": "nft-image",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yuetloo/nft-image.git"
+  },
+  "keywords": [],
+  "author": "Yuet Loo Wong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yuetloo/nft-image/issues"
+  },
+  "homepage": "https://github.com/yuetloo/nft-image#readme",
+  "dependencies": {
+    "ethers": "^5.0.32",
+    "express": "^4.17.1",
+    "express-handlebars": "^5.2.1",
+    "jimp": "^0.16.1",
+    "nodemon": "^2.0.7"
+  }
+}

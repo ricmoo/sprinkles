@@ -1,0 +1,16 @@
+{
+  "name": "sprinkles-subgraph",
+  "version": "1.0.0",
+  "description": "Sprinkles subgraph",
+  "scripts": {
+    "deploy": "scripts/deploy.sh",
+    "build": "graph codegen && graph build"
+  },
+  "keywords": [],
+  "author": "Yuet Loo Wong",
+  "license": "MIT",
+  "dependencies": {
+    "@graphprotocol/graph-cli": "^0.20.0",
+    "@graphprotocol/graph-ts": "^0.20.0"
+  }
+}
