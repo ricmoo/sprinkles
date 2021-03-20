@@ -6,8 +6,6 @@ body {
   position: relative;
 }
 
-.container {
-}
 
 #home > .title {
   color: #00B7FF;
@@ -75,6 +73,43 @@ a {
 #not-found {
   font-size: 30px;
   text-align: center;
-  padding-top: 100px;
+  padding-top: 30px;
   color: #f6851b;
+}
+
+.gallery-container {
+  padding: 100px;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.token-card {
+  padding: 10px;
+  text-align: center;
+  border-radius: 5px;
+  height: 80px;
+  box-shadow: 0 0 10px rgba(95, 125, 149, .3);
+  transition: transform 150ms cubic-bezier(.25,.46,.45,.94), box-shadow 150ms cubic-bezier(.25,.46,.45,.94);
+}
+
+.token-card:hover {
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(95, 125, 149, .3);
+
+}
+
+.token-id {
+  font-size: 15px;
+}
+
+.token-name {
+  font-size: 25px;
+  padding: 10px;
+  color: rgb(73, 72, 72);
 }

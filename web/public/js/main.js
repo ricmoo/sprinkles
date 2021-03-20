@@ -1,4 +1,6 @@
 let address;
+const subgraphUrl = 'https://api.thegraph.com/subgraphs/name/yuetloo/sprinkle-v0-ropsten'
+const sprinkleContractAddress = '0x2B240bdA2B9Ce6A9229E40aAbA9D1b0916D00F40';
 
 window.onload = () => {
    const connectButton = document.getElementById('connect');
@@ -8,7 +10,7 @@ window.onload = () => {
    const dashboard = document.getElementById('dashboard');
 
    const addressLabel = document.getElementById('address');
-   const dashboardContent = document.querySelector('#dashboard .content');
+   const dashboardContent = document.querySelector('#dashboard .card-container');
 
    const notFound = document.getElementById('not-found');
 
@@ -28,8 +30,9 @@ window.onload = () => {
    }
 
    function refreshDashboard() {
+      dashboardContent.textContent =""
       showSpinner();
-      fetchSprinkles()
+      fetchSprinkles(address)
          .then(listSprinkles)
          .finally(() => {
             hideSpinner();
@@ -52,29 +55,58 @@ window.onload = () => {
 
       notFound.style="display:none";
       sprinkles.forEach(sprinkle => {
-         dashboardContent.appendChild(buildCard(sprinkle));
+         const token = {
+            contractAddress: sprinkleContractAddress,
+            id: sprinkle.id,
+            name: "Sprinkle",
+            owner: sprinkle.owner.id
+         }
+         dashboardContent.appendChild(buildCard(token));
       })
    }
 
    function buildCard(token) {
       const box = document.createElement("div");
-      var text = document.createTextNode("token name + collection");
+      const titleBox = document.createElement('div');
+      const idBox = document.createElement('div');
+
+      const name = document.createTextNode(token.name);
+      const idText = document.createTextNode("# " + token.id);
+
+      box.classList.add("token-card");
+      titleBox.classList.add("token-name");
+      idBox.classList.add('token-id')
+
       console.log('token', token)
-      box.appendChild(text);
+      titleBox.appendChild(name);
+      idBox.appendChild(idText);
+
+      box.appendChild(titleBox);
+      box.appendChild(idBox);
       return box;
    }
 
-   async function fetchSprinkles() {
-      const abi = [
-         "event RegisterSprinkle(bytes32 indexed publicKeyHash, uint256 tokenId)",
-         "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
-       ];
-       /*
-       const contract = new ethers.Contract("sprinkles.eth", abi, provider);
-       console.log("Registered:", await contract.queryFilter("RegisterSprinkle"));
-       console.log("Owners:", await contract.queryFilter("Transfer"));
-       */
-      return [];
+   async function fetchSprinkles(owner) {
+      owner = '0x236ff1e97419ae93ad80cafbaa21220c5d78fb7d'
+      const json = {
+         query: `
+         {
+            owners (where: { id: "${owner}"}) {
+               id
+               address
+               sprinkles {
+                 id
+                 owner
+                 publicKeyHash
+               }
+            }
+         }
+         `
+       }
+
+      const res = await ethers.utils.fetchJson(subgraphUrl, JSON.stringify(json));
+      const sprinkles = res.data.owners[0]? res.data.owners[0].sprinkles : [];
+      return sprinkles || [];
    }
 
    async function fetchAssets() {
