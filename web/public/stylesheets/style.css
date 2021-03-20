@@ -43,11 +43,9 @@ a {
   box-shadow: 0 0 30px rgba(95, 125, 149, .3);
 }
 
-#dashboard {
-  display: xnone;
-}
 
-#dashboard .header {
+
+#show-room .header {
   background-color: #fff;
   border-bottom: 1px solid #ccc;
   padding: 10px;
@@ -56,51 +54,54 @@ a {
   width: 100%;
 }
 
-#dashboard .header .logo {
+#show-room .header .logo {
   width: 50%;
   float: left;
   color: #00B7FF;
   font-size: 30px;
 }
 
-#dashboard .header .address-box {
+#show-room .header .address-box {
   text-align: end;
   position: absolute;
   right: 0;
   padding: 10px;
 }
 
-#not-found {
+.not-found {
   font-size: 30px;
   text-align: center;
   padding-top: 30px;
   color: #f6851b;
 }
 
-.gallery-container {
-  padding: 100px;
-  flex-direction: row;
-  justify-content: center;
+#gallery {
+  padding-top: 100px;
 }
 
 .card-container {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: space-around;
+  justify-content: space-evenly;
 }
 
 .token-card {
-  padding: 10px;
+  display: inline-block;
+  flex-grow: 1;
+  padding: 20px;
   text-align: center;
   border-radius: 5px;
-  height: 80px;
+  margin: 30px;
   box-shadow: 0 0 10px rgba(95, 125, 149, .3);
   transition: transform 150ms cubic-bezier(.25,.46,.45,.94), box-shadow 150ms cubic-bezier(.25,.46,.45,.94);
 }
 
 .token-card:hover {
   cursor: pointer;
-  box-shadow: 0 0 20px rgba(95, 125, 149, .3);
+  box-shadow: 0 0 40px rgba(43, 55, 65, 0.3);
 
 }
 
@@ -109,7 +110,10 @@ a {
 }
 
 .token-name {
-  font-size: 25px;
   padding: 10px;
   color: rgb(73, 72, 72);
+}
+
+.token-card > div {
+  margin: 10px;
 }
