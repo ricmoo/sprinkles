@@ -21,3 +21,10 @@ Deploy to heroku
  -  clone this repo
  -  heroku create
  -  git push heroku master
+
+## Try it out
+- web
+  - [https://powerful-stream-18222.herokuapp.com](https://powerful-stream-18222.herokuapp.com)
+- api
+  - [https://powerful-stream-18222.herokuapp.com/image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197](https://powerful-stream-18222.herokuapp.com/image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197)
+  - [https://powerful-stream-18222.herokuapp.com/image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=2](https://powerful-stream-18222.herokuapp.com/image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=2)
