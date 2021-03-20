@@ -1,0 +1,29 @@
+specVersion: 0.0.2
+description: Sprinkle subgraphs
+repository: https://github.com/ricmoo/sprinkles
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Sprinkles
+    network: ropsten
+    source:
+      abi: Sprinkles
+      address: "0x2B240bdA2B9Ce6A9229E40aAbA9D1b0916D00F40"
+      startBlock: 9868940
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Owner
+        - Sprinkle
+      abis:
+        - name: Sprinkles
+          file: ./abi/Sprinkles.json
+      eventHandlers:
+        - event: RegisterSprinkle(indexed bytes32,uint256)
+          handler: handleRegistered
+        - event: Transfer(indexed address,indexed address,indexed uint256)
+          handler: handleTransfer
+      file: ./src/Sprinkles.ts
