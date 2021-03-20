@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sprinkles</title>
+    <link rel="stylesheet" href="/stylesheets/style.css">
+</head>
+<body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="root">
+        <div class="container">
+            <div id="home">
+                <h1 class="title">Sprinkles</h1>
+                <p>Welcome to Sprinkles!!</p>    
+                <div id="connect">Connect with Metamask</div>
+            </div>
+            <div id="dashboard" style="display:none">
+                <div class="header">
+                    <div class="logo">Sprinkles</div>
+                    <div class="address-box">
+                        connected to <span id="address"></span>
+                    </div>
+                    
+                </div>
+                <div id="not-found" style="display: none;">
+                    No sprinkle found!
+                </div>
+                <div class="content"></div>    
+            </div>
+        </div>  
+    </div>
+
+    <script type="text/javascript"
+        integrity="sha384-2l3Oe5AgG/8sQaff0Z5degPMoDwvJ0zkbLaAqtvXxLrw+EW9qOVrLOE3nr1rb9TT"
+        crossorigin="anonymous"
+        src="js/ethers-5.0.32.umd.min.js">
+    </script>
+    <script type="text/javascript" src="js/main.js"></script>
+</body>
+</html>
