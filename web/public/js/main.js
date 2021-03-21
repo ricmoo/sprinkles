@@ -1,6 +1,6 @@
 let address;
 const subgraphUrl = 'https://api.thegraph.com/subgraphs/name/yuetloo/sprinkle-v0-ropsten'
-const sprinkleContractAddress = '0x2B240bdA2B9Ce6A9229E40aAbA9D1b0916D00F40';
+const sprinkleContractAddress = '0xf803Aa7E642e9742498caaBaFBd5846E64dB9221';
 const sprinkleImageUrl = '/assets/sprinkles.png'
 const saveUrl = '/sprinkles';
 
