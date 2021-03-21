@@ -97,8 +97,6 @@ const handleSave = async (req, res, next) => {
  const handleGet = async (req, res, next) => {
      const { sprinkleId } = req.params;
 
-     console.log('req', sprinkleId, req.params, typeof sprinkleId)
-
      let error;
      let sprinkle = {};
  
@@ -118,28 +116,16 @@ const handleSave = async (req, res, next) => {
          if( error ) {
             next(error);
          } else {
-            res.send(sprinkle);
+            res.send(sprinkle || {});
          }
      }
  }
  
- const validateGetImage = (req, res, next ) => {
-    if( !req.query.signature ) {
-        next(new createError.BadRequest('Missing signature'))
-        return;
-    }
 
-    next();
-}
-
-const handleGetImage = (req, res, next ) => {
-    res.send({ok: "ok"})
-}
 
  /* Save a sprinkle config */
  router.post('/', validate, handleSave);
  router.get('/:sprinkleId', handleGet);
- router.get('/image', validateGetImage, handleGetImage)
-
+ 
  module.exports = router;
  

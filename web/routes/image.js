@@ -1,49 +1,24 @@
 const createError = require('http-errors');
+const { getImage, toRGB } = require('../utils/image-helper');
+const { recover } = require('../utils/signature-helper');
 const express = require('express');
 const router = express.Router();
 
-const Jimp = require('jimp');
 const ethers = require('ethers');
+const { MongoClient } = require("mongodb");
 
-const provider = new ethers.providers.InfuraProvider();
-
-const getImage = async (assetAddress, id) => {
-   let contractAddress = assetAddress;
-   if( !ethers.utils.isAddress(contractAddress) ) {
-       contractAddress = await provider.resolveName(assetAddress);
-   }
-
-   const baseUrl=`https://api.opensea.io/api/v1/assets?asset_contract_address=${contractAddress}&limit=1`
-   const url = id? `${baseUrl}&token_ids=${id}` : baseUrl;
-
-   let res = await ethers.utils.fetchJson(url);
-   const imageUrl = res.assets[0].image_url;
-
-   if(!imageUrl) {
-      throw new Error('Unable to fetch image')
-   }
-
-   const matrix = [];
-   res = await Jimp.read(imageUrl)
-               .then(image => image
-                  .resize(240,240)
-                  .scan(0, 0, image.bitmap.width, image.bitmap.height, (x, y, idx) => {
-                        const red   = image.bitmap.data[idx + 0];
-                        const green = image.bitmap.data[idx + 1];
-                        const blue  = image.bitmap.data[idx + 2];
-                        matrix.push(red);
-                        matrix.push(green);
-                        matrix.push(blue);
-                  }));
-
-   const rgbHex = ethers.utils.hexlify(matrix);
-   console.log({ contractAddress, id, imageUrl });
-
-   return rgbHex;
-}
+const dbName = 'sprinklesdb'
+const collection = 'sprinkles'
+const missingUrl = 'https://powerful-stream-18222.herokuapp.com/assets/sprinkles.png'
 
 
 const validate = async (req, res, next) => {
+
+   if( req.query.signature ) {
+      next();
+      return;
+   }
+
    let { contract_address: contractAddress, token_id: tokenId } = req.query;
    if( !contractAddress || !tokenId ) {
       next(new createError.BadRequest('missing query params contract_address or token_id'));
@@ -65,9 +40,65 @@ const validate = async (req, res, next) => {
    next();
 }
 
+const fetchSprinkle = async (publicKeys) => {
+    
+   let sprinkle;
+   const client = new MongoClient(process.env.MONGODB_URL, { useUnifiedTopology: true });
+   try {
+      await client.connect();
+      const database = client.db(dbName);
+      const sprinkles = database.collection(collection);
+   
+      const query = { publicKeyHash: { $in: publicKeys } };
+      sprinkle = await sprinkles.findOne(query);
+   } 
+   finally {
+       await client.close();
+   }
+
+   return sprinkle;
+}
+
+const computePubKeys = (hash, signature) => {
+   const keys = [0, 1].map(recoveryParam => {
+       let sig = {
+           r: ("0x" + signature.substring(2, 66)),
+           s: ("0x" + signature.substring(66, 130)),
+           recoveryParam
+       };
+
+       return recover(hash, sig);
+   });
+
+   return keys;
+}
+
+const getImageBySignature = async (signature ) => {
+   const hash = ethers.utils.id("sprinkles");
+   const keys = computePubKeys(hash, signature);
+   const sprinkle = await fetchSprinkle(keys);
+
+   let image;
+   if( sprinkle ) {
+      image = await getImage(sprinkle.tokenContractAddress, sprinkle.tokenId);
+   } else {
+      console.log('no image....')
+      image = await toRGB(missingUrl);
+   }
+   return(image);
+
+}
+
+
 const handleGet = async (req, res, next) => {
    try {
-      const image = await getImage(req.contractAddress, req.tokenId);
+      let image;
+
+      if( req.query.signature ) {
+         image = await getImageBySignature(req.query.signature);
+      } else {
+         image = await getImage(req.contractAddress, req.tokenId);
+      }
       res.send(image);
    } catch ( err ) {
       next(err);
