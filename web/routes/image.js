@@ -67,7 +67,7 @@ const computePubKeys = (hash, signature) => {
            recoveryParam
        };
 
-       return recover(hash, sig);
+       return recover(hash, sig).pubkeyHash;
    });
 
    return keys;
@@ -76,6 +76,8 @@ const computePubKeys = (hash, signature) => {
 const getImageBySignature = async (signature ) => {
    const hash = ethers.utils.id("sprinkles");
    const keys = computePubKeys(hash, signature);
+
+   console.log('keys', keys)
    const sprinkle = await fetchSprinkle(keys);
 
    let image;
