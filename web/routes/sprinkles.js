@@ -110,6 +110,9 @@ const handleSave = async (req, res, next) => {
      
         const query = { sprinkleId }; 
         sprinkle = await sprinkles.findOne(query);
+        if( !sprinkle ) {
+            sprinkle = {};
+        }
      } catch ( err ) {
          error = err;
      } finally {
