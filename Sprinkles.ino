@@ -240,16 +240,61 @@ void fetcherTask(void *context) {
 
   // Connect Wifi
 
+  uint8_t sprinkles[] = {
+    79, 243,  36, 196, 222,  23, 195, 182,
+    234, 173, 149, 202, 173,  50, 128, 111,
+    116, 213, 246, 244, 176, 113,  64,  98, 
+    56,  94, 187, 160, 170, 206, 220, 226
+  };
+
+  const uint8_t hexChars[] = { 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+
   while (true) {
     Serial.println("Fetcher");
 
     if (webClient.connect("powerful-stream-18222.herokuapp.com", 80)) {
       Serial.println("connected to server");
 
+      
+      bool success = atecc.createSignature(sprinkles);
+      printf("Signed (%d): ");
+      dumpBuffer("", atecc.signature, 64);
+      
+      uint8_t prefix[] = "GET http://powerful-stream-18222.herokuapp.com/image?signature=0x";
+      uint8_t suffix[] = " HTTP/1.1";
+      uint8_t url[256];
+
+      uint32_t offset = 0;
+      while (true) {
+        uint8_t v = prefix[offset];
+        if (v == 0) { break; }
+        url[offset++] = v;
+      }
+
+      for (uint32_t i = 0; i < 64; i++) {
+          url[offset++] = hexChars[atecc.signature[i] >> 4];
+          url[offset++] = hexChars[atecc.signature[i] & 0x0f];
+      }
+
+      uint32_t i = 0;
+      while (true) {
+        uint8_t v = suffix[i++];
+        if (v == 0) { break; }
+        url[offset++] = v;
+      }
+
+      url[offset++] = 0;
+
+      printf("URL: \"%s\"\n", url);
+
       // Make a HTTP request:
       
 //      webClient.println("GET /image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197 HTTP/1.1");
-      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=1337 HTTP/1.1");
+//      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=1337 HTTP/1.1");
+//      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=19709 HTTP/1.1");
+//      webClient.println("GET /image?contract_address=0x91e03CA709C1950e621060e64ddEbdc3B7C6deDE&token_id=89 HTTP/1.1");
+      webClient.println((const char* const)url);
+      
       webClient.println("Host: powerful-stream-18222.herokuapp.com");
       webClient.println("Connection: close");
       webClient.println();
@@ -342,9 +387,6 @@ void fetcherTask(void *context) {
     printf("Fetcher Hgih-Water: %d\n", uxTaskGetStackHighWaterMark(NULL));
 
     delay(10000);
-
-    // Debug; trying to figure out signing...
-    while (1) { delay(1000); }
   }
 }
 
