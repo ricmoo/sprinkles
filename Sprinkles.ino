@@ -1,4 +1,38 @@
 
+// NOTE:
+// The Secure Enclave requires an I2C Buffer of 256. This is not standard
+// in many Arduino environments. You will need to modify the Wire.h files
+// to increase it. Also the Arduino IDE likes to aggresively cache things,
+// so you should try switching boards (to one you do not have hooked up)
+// and recompile, which will flush the build cache. Then quit the app and
+// relaunch it. I also recommend adding a new method (I added testThis())
+// to the Wire.h and Wire.cpp and call it to make sure your new files
+// is being picked up.
+//
+// Thanks to rz259 and lewispg228, without whom I would never have figured
+// this out; Always check closed issues. :)
+// See: https://github.com/sparkfun/SparkFun_ATECCX08a_Arduino_Library/issues/7
+
+/**
+ * TODO:
+ * 
+ * WiFi Configuration
+ * If no Wifi connection is found, provide a QR code for AP setup
+ * 
+ * BLE Validation
+ * Let any device connect over BLE and pass a challenge to sign proviing this
+ * is an official Sprinkle.
+ * 
+ * - Use a signature from the server to authenticate (we avoid using SSL), optionally
+ *   encrypting the request using ECDH.
+ * 
+ * - Cache Images to NVS; this requires a custom partition table, so ESP-IDF will be
+ *   needed in a more intimate way. Not hard, just time.
+ * 
+ * - Move to the C libraries; C++ fragments memory weird and makes things feel disjoint. :)
+ * 
+ */
+
 #include <SparkFun_ATECCX08a_Arduino_Library.h>
 #include <SPI.h>
 #include <WiFi.h>
@@ -36,7 +70,7 @@ void setup() {
   // Set up the serial monitor
   Serial.begin(115200);
 
-    displayContext = display_init(DisplaySpiBusVspi, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_BACKLIGHT, DisplayRotationPinsTop);
+  displayContext = display_init(DisplaySpiBusVspi, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_BACKLIGHT, DisplayRotationPinsTop);
 
   // Use the second core for polling the server (core 0)
   //xTaskCreatePinnedToCore(&displayTask, "fetcher", 1024 * 2, NULL, 0, NULL, 0);
@@ -44,53 +78,25 @@ void setup() {
   // This cannot be done in the fetcherTask for some reason; once we move to esp-idf it should be better
   connectWifi();
 
+  setupSecureEnclave();
+  testSign();
+
   // Run the Fethcer on the default core (core 1)
   fetcherTask(NULL);
-
-
-  // Show current cached cat 
-
-  // Move to fetch
-//  setupSecureEnclave();
 }
 
 
 
 void loop() {
-  Serial.println("Moo");
-
-
-
-  /*
-    while (client.available()) {
-    char c = client.read();
-    Serial.write(c);
-  }
-
-  // if the server's disconnected, stop the client:
-
-  if (!client.connected()) {
-
-    Serial.println();
-
-    Serial.println("disconnecting from server.");
-
-    client.stop();
-
-    // do nothing forevermore:
-
-    while (true);
-
-  }
-  */
-  
-  // put your main code here, to run repeatedly:
-  
+  Serial.println("Never reaches here.");
   delay(100000);
 }
 
 void setupSecureEnclave() {
+  printf("Going to start...\n");
   Wire.begin(PIN_SECURE_SDA, PIN_SECURE_SCL);
+
+  printf("Here we go: %d\n", Wire.testThis());
 
   if (atecc.begin() == true) {
     Serial.println("Successful wakeUp(). I2C connections are good.");
@@ -122,70 +128,42 @@ void connectWifi() {
   }
 }
 
-//#define DATA_BUFFER_SIZE      (1024 * 200)
-
-
 void printSecureEnclaveInfo() {
   // Read all 128 bytes of Configuration Zone
   // These will be stored in an array within the instance named: atecc.configZone[128]
   atecc.readConfigZone(false); // Debug argument false (OFF)
 
   // Print useful information from configuration zone data
-  Serial.println();
+  printf("\n");
 
   // Serial Number
-  Serial.print("Serial Number: \t");
-  for (int i = 0; i < 9; i++) {
-    if ((atecc.serialNumber[i] >> 4) == 0) { Serial.print("0"); }
-    Serial.print(atecc.serialNumber[i], HEX);
-  }
-  Serial.println();
+  dumpBuffer("Serial Number: \t", atecc.serialNumber, 9);
 
   // Revision Number
-  Serial.print("Rev Number: \t");
-  for (int i = 0 ; i < 4 ; i++) {
-    if ((atecc.revisionNumber[i] >> 4) == 0) { Serial.print("0"); }
-    Serial.print(atecc.revisionNumber[i], HEX);
-  }
-  Serial.println();
+  dumpBuffer("Rev Number: \t", atecc.revisionNumber, 4);
 
   // Configuration Zone
-  Serial.print("Config Zone: \t");
-  if (atecc.configLockStatus) {
-    Serial.println("Locked");
-  } else { 
-    Serial.println("NOT Locked");
-  }
+  printf("Config Zone: \t%s\n", atecc.configLockStatus ? "Locked": "NOT Locked");
 
   // Data/OTP Zone:
-  Serial.print("Data/OTP Zone: \t");
-  if (atecc.dataOTPLockStatus) {
-    Serial.println("Locked");
-  } else {
-    Serial.println("NOT Locked");
-  }
+  printf("Data/OTP Zone: \t%s\n", atecc.dataOTPLockStatus ? "Locked": "NOT Locked");
 
   // Data Slot 0
-  Serial.print("Data Slot 0: \t");
-  if (atecc.slot0LockStatus) {
-    Serial.println("Locked");
-  } else {
-    Serial.println("NOT Locked");
-  }
+  printf("Data Slot 0: \t%s\n", atecc.slot0LockStatus ? "Locked": "NOT Locked");
 
-  Serial.println();
+  printf("\n");
 
   // if everything is locked up, then configuration is complete, so let's print the public key
   if (atecc.configLockStatus && atecc.dataOTPLockStatus && atecc.slot0LockStatus)  {
     if(atecc.generatePublicKey() == false) {
-      Serial.println("Failure to generate this device's Public Key");
-      Serial.println();
+      printf("Failure to generate this device's Public Key\n");
+      printf("\n");
     }
   }
 }
 
-#define DATA_BUFFER_SIZE        (1024 * 60)
-
+// Read line up to length characters and if it begins with (case-insensitive) "Content-Length:"
+// return the decimal value converted to a number
 int32_t getContentLength(uint8_t *line, uint32_t length) {
   uint32_t offset = 0;
 
@@ -225,9 +203,34 @@ int32_t getContentLength(uint8_t *line, uint32_t length) {
   return result;
 }
 
+// Convert a human-readable nibble to its value
 uint8_t fromNibble(uint8_t v) {
   if (v >= 0x30 && v <= 0x39) { return v - 0x30; }
   return (v | 0x20) - 0x61 + 10;
+}
+
+// Dump a buffer to the console
+void dumpBuffer(const char* const header, uint8_t *data, uint32_t length) {
+  printf(header);
+  for (uint8_t i = 0; i < length; i++) {
+    printf("%02x", data[i]);
+  }
+  printf("\n");
+}
+
+void testSign() {
+  // @TODO: in the futre, this will be a challenge/timestamp challenge form the server
+//  atecc.wakeUp();
+  uint8_t sprinkles[] = {
+    79, 243,  36, 196, 222,  23, 195, 182,
+    234, 173, 149, 202, 173,  50, 128, 111,
+    116, 213, 246, 244, 176, 113,  64,  98, 
+    56,  94, 187, 160, 170, 206, 220, 226
+  };
+  atecc.createSignature(sprinkles);
+//  bool success = atecc.loadTempKey(sprinkles);
+//  success = atecc.signTempKey();
+  dumpBuffer("Signature: ", atecc.signature, 64);
 }
 
 void fetcherTask(void *context) {
@@ -235,13 +238,7 @@ void fetcherTask(void *context) {
 
   WiFiClient webClient;
 
-//  char server[] = "www.google.com";
-
   // Connect Wifi
-  uint8_t *dataBuffer0 = (uint8_t*)malloc(DATA_BUFFER_SIZE + 1);
-  uint8_t *dataBuffer1 = (uint8_t*)malloc(DATA_BUFFER_SIZE + 1);
-  printf("DD: %p %p\n", dataBuffer0, dataBuffer1);
-//  uint8_t *dataBuffer = (uint8_t*)heap_caps_malloc(DATA_BUFFER_SIZE + 1, MALLOC_CAP_SPIRAM);
 
   while (true) {
     Serial.println("Fetcher");
@@ -252,7 +249,7 @@ void fetcherTask(void *context) {
       // Make a HTTP request:
       
 //      webClient.println("GET /image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197 HTTP/1.1");
-      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=821201 HTTP/1.1");
+      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=1337 HTTP/1.1");
       webClient.println("Host: powerful-stream-18222.herokuapp.com");
       webClient.println("Connection: close");
       webClient.println();
@@ -345,9 +342,13 @@ void fetcherTask(void *context) {
     printf("Fetcher Hgih-Water: %d\n", uxTaskGetStackHighWaterMark(NULL));
 
     delay(10000);
+
+    // Debug; trying to figure out signing...
+    while (1) { delay(1000); }
   }
 }
 
+// Draw the entire screen (every fragment)
 void redraw() {
     uint32_t screenDone = 0;
     while (!screenDone) {
@@ -361,12 +362,9 @@ void displayTask(void *context) {
   // Initialize the Display
   displayContext = display_init(DisplaySpiBusVspi, PIN_DISPLAY_DC, PIN_DISPLAY_RESET, PIN_DISPLAY_BACKLIGHT, DisplayRotationPinsTop);
   while (true) {
-    //Serial.println("Display");
     uint32_t screenDone = 0;
     while (!screenDone) {
       screenDone = display_render(displayContext);
     }
-    //Serial.println(uxTaskGetStackHighWaterMark(NULL));
-    delay(1000);
   }
 }
