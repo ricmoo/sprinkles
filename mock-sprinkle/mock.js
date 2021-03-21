@@ -31,11 +31,23 @@ module.exports = {
         };
     },
     sign: function(privateKey, digest) {
-        const key = ec.keyFromSecret(ethers.utils.arrayify(privateKey));
-        return key.sign(msgHash);
+        const key = ec.keyFromPrivate(ethers.utils.arrayify(privateKey));
+        const sig = key.sign(ethers.utils.arrayify(digest), { canonical: true });
+        return ethers.utils.hexlify(ethers.utils.concat([
+            ethers.utils.hexZeroPad("0x" + sig.r.toString(16), 32),
+            ethers.utils.hexZeroPad("0x" + sig.s.toString(16), 32),
+            ((sig.recoveryParam === 0) ? "0x00": "0x01")
+        ]));
     },
     recover: function(digest, signature) {
-        const rec = ec.recoverPubKey(msgHash, { r: signature.r, s: signature.s }, signature.recoveryParam);
-        return rec.encode("hex", true);
+        const rec = ec.recoverPubKey(ethers.utils.arrayify(digest), {
+            r: ethers.utils.arrayify(signature.r),
+            s: ethers.utils.arrayify(signature.s)
+        }, signature.recoveryParam);
+        const pubKey = "0x" + rec.encode("hex", false);
+        return {
+            public: pubKey,
+            pubkeyHash: ethers.utils.keccak256(pubKey)
+        };
     }
 };

@@ -22,6 +22,10 @@ Deploy to heroku
  -  heroku create
  -  git push heroku master
 
+## Mongo DB
+ - the backend requires a connection to the mongo db
+ - the mongo db url is retrieved from the envrionment variable MONGODB_URL
+
 ## Try it out
 - web
   - [https://powerful-stream-18222.herokuapp.com](https://powerful-stream-18222.herokuapp.com)

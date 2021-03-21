@@ -37,3 +37,25 @@ are completed off-chain this doesn't matter though.
   public:     0x04521c320799e609e0cc77161fd1ed789c8babe5b98d482a0ce0ad7fac1b83d377fb68ce7d1a57130ec02fb4bfb45f3f600b71c0544000410190f109266de929d0
   pubkeyHash: 0x6424ede1f84f0965185a7dac24640fc77d1a95a08f646bdfb9209228902ba842
   private:    0xf6da82fffca4897fa40b518177380ce27249a6da60bede565d14c1106999ce24
+
+
+Scripts
+-------
+
+### Generate new Mock Sprinkles
+
+```
+/home/ricmoo> node generate
+```
+
+### Create Signed URL
+
+```
+/home/ricmoo> node sign-url PRIVATE_KEY URL
+```
+
+### Validate Signed URL
+
+```
+/home/ricmoo> node verify-url URL
+```
