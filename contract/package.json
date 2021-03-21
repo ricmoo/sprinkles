@@ -1,0 +1,14 @@
+{
+  "name": "hardhat-project",
+  "scripts": {
+    "build": "rm -rf artifacts && hardhat compile && mv artifacts/build-info/*.json artifacts/build-info/output.json"
+  },
+  "devDependencies": {
+    "hardhat": "^2.1.1"
+  },
+  "dependencies": {
+    "@ethersproject/cli": "^5.0.10",
+    "@openzeppelin/contracts": "^3.4.1",
+    "ethers": "^5.0.32"
+  }
+}
