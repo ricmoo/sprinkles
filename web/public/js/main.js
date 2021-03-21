@@ -131,7 +131,7 @@ window.onload = () => {
 
    function listSprinkles(sprinkles) {
       if( sprinkles.length === 0 ) {
-         notFound.style="display:block";
+         showNotFound("sprinkles");
          return;
       }
 
