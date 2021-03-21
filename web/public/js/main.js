@@ -79,7 +79,6 @@ window.onload = () => {
       return async (e) => {
          gallery.textContent="";
          let owner = sprinkle.owner;
-         owner = '0x23936429FC179dA0e1300644fB3B489c736D562F';
          const assets = await fetchAssets(owner);
 
          if( assets.length === 0 ) {
@@ -113,7 +112,7 @@ window.onload = () => {
 
    function refreshDashboard() {
       gallery.textContent =""
-      const addr = '0x236ff1e97419ae93ad80cafbaa21220c5d78fb7d';
+      const addr = address;
       showSpinner();
       fetchSprinkles(addr)
          .then(listSprinkles)
@@ -132,7 +131,7 @@ window.onload = () => {
 
    function listSprinkles(sprinkles) {
       if( sprinkles.length === 0 ) {
-         notFound.style="display:block";
+         showNotFound("sprinkles");
          return;
       }
 
