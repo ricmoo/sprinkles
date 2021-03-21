@@ -17,7 +17,11 @@ const getImage = async (assetAddress, id) => {
    const url = id? `${baseUrl}&token_ids=${id}` : baseUrl;
 
    let res = await ethers.utils.fetchJson(url);
-   const imageUrl = res.assets?.[0].image_url;
+   const imageUrl = res.assets[0].image_url;
+
+   if(!imageUrl) {
+      throw new Error('Unable to fetch image')
+   }
 
    const matrix = [];
    res = await Jimp.read(imageUrl)

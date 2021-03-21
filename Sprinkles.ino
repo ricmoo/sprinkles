@@ -225,6 +225,11 @@ int32_t getContentLength(uint8_t *line, uint32_t length) {
   return result;
 }
 
+uint8_t fromNibble(uint8_t v) {
+  if (v >= 0x30 && v <= 0x39) { return v - 0x30; }
+  return (v | 0x20) - 0x61 + 10;
+}
+
 void fetcherTask(void *context) {
   printf("Fetcher: coreId=%d\n", xPortGetCoreID());
 
@@ -245,7 +250,9 @@ void fetcherTask(void *context) {
       Serial.println("connected to server");
 
       // Make a HTTP request:
-      webClient.println("GET /image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197 HTTP/1.1");
+      
+//      webClient.println("GET /image?contract_address=0x31385d3520bced94f77aae104b406994d8f2168c&token_id=7197 HTTP/1.1");
+      webClient.println("GET /image?contract_address=0x06012c8cf97bead5deae237070f9587f8e7a266d&token_id=821201 HTTP/1.1");
       webClient.println("Host: powerful-stream-18222.herokuapp.com");
       webClient.println("Connection: close");
       webClient.println();
@@ -323,7 +330,7 @@ void fetcherTask(void *context) {
           continue;
         }
 
-        color[count++] = (b - 0x30);
+        color[count++] = fromNibble(b);
         if (count == 6) {
           display_setPixel(index % 240, index / 240, (color[0] << 4) | color[1], (color[2] << 4) | color[3], (color[4] << 4) | color[5]);
           index++;
@@ -331,6 +338,8 @@ void fetcherTask(void *context) {
         }
       }
     }
+
+    printf("Redraw!\n");
     redraw();
 
     printf("Fetcher Hgih-Water: %d\n", uxTaskGetStackHighWaterMark(NULL));
