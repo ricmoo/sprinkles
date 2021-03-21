@@ -9,7 +9,7 @@ dataSources:
     network: ropsten
     source:
       abi: Sprinkles
-      address: "0x2B240bdA2B9Ce6A9229E40aAbA9D1b0916D00F40"
+      address: "0xf803Aa7E642e9742498caaBaFBd5846E64dB9221"
       startBlock: 9868940
     mapping:
       kind: ethereum/events
