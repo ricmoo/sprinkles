@@ -117,3 +117,16 @@ a {
 .token-card > div {
   margin: 10px;
 }
+
+.hide {
+  display: none;
+}
+
+.check-mark {
+  color: green;
+  font-size: 20px;
+}
+
+.highlight-border {
+  border: 5px solid rgba(43, 55, 65, 0.3);
+}

@@ -1,7 +1,10 @@
 let address;
 const subgraphUrl = 'https://api.thegraph.com/subgraphs/name/yuetloo/sprinkle-v0-ropsten'
 const sprinkleContractAddress = '0x2B240bdA2B9Ce6A9229E40aAbA9D1b0916D00F40';
+const sprinkleImageUrl = '/assets/sprinkles.png'
+const saveUrl = '/sprinkles';
 
+const selectedUrl = (sprinkleId) => `/sprinkles/${sprinkleId}`
 
 window.onload = () => {
    const connectButton = document.getElementById('connect');
@@ -32,31 +35,73 @@ window.onload = () => {
       gallery.appendChild(box);
    }
 
-   function handleSave(token) {
-      return () => {
-
-      }
-
+   function clearSelected() {
+      // clear border for previously selected card
+      const cards = document.querySelectorAll('.token-card.highlight-border')
+      cards.forEach(card => {
+         card.className = "token-card";
+      })
    }
 
-   function showAssets(owner) {
-      console.log('sprinkle clicked')
+   function markSelected(element){
+      element.classList.add('highlight-border');
+   }
+
+   function handleSave(sprinkle, asset, clickedElement) {
+      return async (evt) => {
+
+         const json = {
+            sprinkle: {
+               sprinkleId: sprinkle.id,
+               publicKeyHash: sprinkle.publicKeyHash,
+               owner: asset.owner,
+               tokenId: asset.id,
+               tokenContractAddress: asset.contractAddress
+            }
+          }
+
+         try {
+            await ethers.utils.fetchJson(saveUrl, JSON.stringify(json));
+            clearSelected();
+            markSelected(clickedElement);
+         } catch (err) {
+            alert(`Error saving config ${err.message}`)
+         }
+
+      }
+   }
+
+   function fetchSelected(sprinkle) {
+      return ethers.utils.fetchJson(selectedUrl(sprinkle.id));
+   }
+
+   function showAssets(sprinkle) {
       return async (e) => {
          gallery.textContent="";
+         let owner = sprinkle.owner;
          owner = '0x23936429FC179dA0e1300644fB3B489c736D562F';
          const assets = await fetchAssets(owner);
-         console.log('got assets', assets)
 
          if( assets.length === 0 ) {
             showNotFound("Assets");
          }
 
+         const selected = await fetchSelected(sprinkle);
          assets.forEach(asset => {
-            console.log('build card asset', asset)
             const tokenElement = buildCard(asset);
+
+            if( asset.id === selected.tokenId &&
+                asset.contractAddress === selected.tokenContractAddress
+               )
+            {
+               markSelected(tokenElement);
+            }
+
+
             gallery.appendChild(tokenElement);
-            tokenElement.addEventListener('click', handleSave(asset));
+            tokenElement.addEventListener('click', handleSave(sprinkle, asset, tokenElement));
          })
+
       }
    }
 
@@ -92,17 +137,9 @@ window.onload = () => {
       }
 
       sprinkles.forEach(sprinkle => {
-         const token = {
-            contractAddress: sprinkleContractAddress,
-            id: sprinkle.id,
-            name: `# ${ethers.BigNumber.from(sprinkle.id).toString()}`,
-            collection: "Sprinkles",
-            owner: sprinkle.owner.id
-         }
-         const tokenElement = buildCard(token);
+         const tokenElement = buildCard(sprinkle);
          gallery.appendChild(tokenElement);
-         console.log('sprinkle', sprinkle, token)
-         tokenElement.addEventListener('click', showAssets(token.owner));
+         tokenElement.addEventListener('click', showAssets(sprinkle));
       })
    }
 
@@ -111,7 +148,6 @@ window.onload = () => {
       box.classList.add("token-card");
 
       if( token.imageUrl ) {
-         console.log('build image', token.imageUrl)
          const image = document.createElement('img');
          image.src = token.imageUrl;
          image.width = "200";
@@ -120,7 +156,6 @@ window.onload = () => {
          box.appendChild(image);
       }
 
-      console.log('building...', token)
       const collection = document.createElement('div');
       const collectionText = document.createTextNode(token.collection);
       collection.appendChild(collectionText);
@@ -133,6 +168,7 @@ window.onload = () => {
 
       box.appendChild(collection)
       box.appendChild(name);
+
       return box;
    }
 
@@ -142,7 +178,6 @@ window.onload = () => {
          {
             owners (where: { id: "${owner}"}) {
                id
-               address
                sprinkles {
                  id
                  owner { id }
@@ -154,8 +189,25 @@ window.onload = () => {
        }
 
       const res = await ethers.utils.fetchJson(subgraphUrl, JSON.stringify(json));
-      const sprinkles = res.data.owners[0]? res.data.owners[0].sprinkles : [];
-      return sprinkles || [];
+
+      let sprinkles = [];
+
+      if( res.data.owners[0] && res.data.owners[0].sprinkles ) {
+         sprinkles = res.data.owners[0].sprinkles.map(sprinkle => {
+            const tokenId = ethers.BigNumber.from(sprinkle.id).toString();
+            return {
+               contractAddress: sprinkleContractAddress,
+               id: tokenId,
+               name: `# ${tokenId}`,
+               collection: "Sprinkles",
+               owner: sprinkle.owner.id,
+               imageUrl: sprinkleImageUrl,
+               publicKeyHash: sprinkle.publicKeyHash
+            }
+         });
+      }
+
+      return sprinkles;
    }
 
    async function fetchAssets(owner) {

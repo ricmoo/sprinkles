@@ -6,6 +6,7 @@ const exphbs = require('express-handlebars');
 
 const indexRouter = require('./routes/index');
 const imageRouter = require('./routes/image');
+const sprinklesRouter = require('./routes/sprinkles');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/image', imageRouter);
+app.use('/sprinkles', sprinklesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
