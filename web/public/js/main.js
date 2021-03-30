@@ -18,6 +18,11 @@ window.onload = () => {
 
    const notFound = document.getElementById('not-found');
 
+   const logo = document.querySelector(".logo")
+   logo.addEventListener('click', () => {
+      gotoDashboard();
+   })
+
    function setAccountAddress(addr) {
       address = addr;
       addressLabel.textContent = formatAdress(addr);

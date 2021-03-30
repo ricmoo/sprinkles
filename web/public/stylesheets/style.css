@@ -66,6 +66,10 @@ header .logo {
   font-size: 30px;
 }
 
+.logo:hover {
+  cursor: pointer;
+}
+
 .connection-box {
   position: absolute;
   right: 30px;
