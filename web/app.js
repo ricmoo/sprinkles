@@ -36,9 +36,9 @@ app.use(function(err, req, res, next) {
   res.locals.error = err;
 
   // render the error page
-  
-  res.status(err.status || 500);
-  res.render('error', err);
+  const status = err.status || 500;
+  res.status(status);
+  res.render('error', { status, stack: err.stack });
 });
 
 module.exports = app;

@@ -24,7 +24,7 @@ window.onload = () => {
    }
 
    function formatAdress(addr) {
-      return addr.slice(0, 10) + "..." + addr.slice(-8);
+      return addr.slice(0, 6) + "..." + addr.slice(-4);
    }
 
    function showNotFound(what) {

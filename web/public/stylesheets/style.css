@@ -43,29 +43,33 @@ a {
   box-shadow: 0 0 30px rgba(95, 125, 149, .3);
 }
 
+#show-room {
+  position: relative;
+}
 
-
-#show-room .header {
+header {
   background-color: #fff;
   border-bottom: 1px solid #ccc;
   padding: 10px;
-  overflow: auto;
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
 }
 
-#show-room .header .logo {
-  width: 50%;
-  float: left;
+.navbar div{
+  display: inline-block;
+}
+
+header .logo {
   color: #00B7FF;
   font-size: 30px;
 }
 
-#show-room .header .address-box {
-  text-align: end;
+.connection-box {
   position: absolute;
-  right: 0;
-  padding: 10px;
+  right: 30px;
+  line-height: 35px;
 }
 
 .not-found {
