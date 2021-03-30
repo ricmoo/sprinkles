@@ -81,20 +81,13 @@ header .logo {
 
 #gallery {
   padding-top: 100px;
-}
-
-.card-container {
   display: flex;
   flex-direction: row;
+  justify-content: center;
   flex-wrap: wrap;
-  align-items: center;
-  align-content: space-around;
-  justify-content: space-evenly;
 }
 
 .token-card {
-  display: inline-block;
-  flex-grow: 1;
   padding: 20px;
   text-align: center;
   border-radius: 5px;
