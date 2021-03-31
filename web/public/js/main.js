@@ -80,32 +80,38 @@ window.onload = () => {
       return ethers.utils.fetchJson(selectedUrl(sprinkle.id));
    }
 
+   function showOnGallery({sprinkle, assets, selected}) {
+      assets.forEach(asset => {
+         const tokenElement = buildCard(asset);
+
+         if( asset.id === selected.tokenId &&
+             asset.contractAddress === selected.tokenContractAddress
+            )
+         {
+            markSelected(tokenElement);
+         }
+
+
+         gallery.appendChild(tokenElement);
+         tokenElement.addEventListener('click', handleSave(sprinkle, asset, tokenElement));
+      })
+   }
+
    function showAssets(sprinkle) {
       return async (e) => {
          gallery.textContent="";
          let owner = sprinkle.owner;
+
+         showSpinner();
          const assets = await fetchAssets(owner);
+         const selected = await fetchSelected(sprinkle);
+         hideSpinner();
 
          if( assets.length === 0 ) {
             showNotFound("Assets");
          }
 
-         const selected = await fetchSelected(sprinkle);
-         assets.forEach(asset => {
-            const tokenElement = buildCard(asset);
-
-            if( asset.id === selected.tokenId &&
-                asset.contractAddress === selected.tokenContractAddress
-               )
-            {
-               markSelected(tokenElement);
-            }
-
-
-            gallery.appendChild(tokenElement);
-            tokenElement.addEventListener('click', handleSave(sprinkle, asset, tokenElement));
-         })
-
+         showOnGallery({ sprinkle, assets, selected});
       }
    }
 
@@ -120,6 +126,10 @@ window.onload = () => {
       const addr = address;
       showSpinner();
       fetchSprinkles(addr)
+         .then(sprinkles => {
+            hideSpinner();
+            return sprinkles;
+         })
          .then(listSprinkles)
          .finally(() => {
             hideSpinner();
@@ -127,11 +137,14 @@ window.onload = () => {
    }
 
    function showSpinner() {
-
+      const spinner = document.createElement("div");
+      spinner.classList.add("spinner");
+      gallery.appendChild(spinner);
    }
 
    function hideSpinner() {
-
+      const spinner = document.querySelector('.spinner')
+      if( spinner ) spinner.remove()
    }
 
    function listSprinkles(sprinkles) {
